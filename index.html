@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSMichelJ - App de tareas</title>
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="shortcut icon" href="./static/img/tasks.svg" type="image/svg">
+    <style>
+        .columns {
+            margin: 0;
+        }
+        .hero{
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <span class="navbar-item">
+                    <img src="./static/img/tasks.svg" alt="Logo" width="112" height="28">
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div id="app">
+        <section class="hero is-primary mb-4">
+            <div class="container">
+                <div class="hero-body columns">
+                    <div class="column">
+                        <div class="box">
+                            <form>
+                                <div class="control">
+                                    <textarea v-model="task" class="textarea has-fixed-size" placeholder="Escribe tu tarea..."></textarea>
+
+                                    <div class="field is-grouped is-grouped-centered">
+                                        <button class="mt-4 button is-success is-rounded" v-on:click.prevent="saveTask">Guardar Tarea</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="column has-text-centered">
+                        <p class="title">
+                            App de tareas con VueJS y Bulma
+                        </p>
+                        <p class="subtitle is-6">
+                            by
+                            <a href="https://github.com/NSMichelJ">
+                                NSMichelJ
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="container">
+            <div class="columns is-multiline is-mobile">
+                <div v-for="task in tasks" class="column">
+                    <div class="notification ">
+                        <button v-on:click="deleteTask(task.id)" class="delete"></button>
+                        {{task.text}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./static/js/vue.min.js"></script>
+    <script>
+        const vm = new Vue({
+            el: '#app',
+            data: {
+                task: '',
+                tasks: []
+            },
+            created() {
+                this.getTask()
+            },
+            methods: {
+                setItemInLocalStorage(data){
+                    localStorage.setItem('task-app-data', JSON.stringify(data))
+                },
+                
+                getTask: function () {
+                    tasks = JSON.parse(localStorage.getItem('task-app-data'))
+                    if (tasks != null) {
+                        this.tasks = tasks[1]
+                        if (tasks[1].length == 0) {
+                            tasks[0] = 0
+                            this.setItemInLocalStorage(tasks)
+                        }  
+                    }
+                },
+
+                saveTask: function () {
+                    if (this.task != '') {
+                        task = {
+                            id: 0,
+                            text: this.task
+                        }
+
+                        tasks = JSON.parse(localStorage.getItem('task-app-data'))
+
+                        if (tasks != null) {
+                            task.id = tasks[0] + 1
+                            tasks[0] += 1
+                            tasks[1].push(task)
+                            this.setItemInLocalStorage(tasks)
+                        } else {
+                            tasks = [0, []]
+                            tasks[1].push(task)
+                            this.setItemInLocalStorage(tasks)
+                        }
+                        this.getTask()
+                        this.task = ''
+                    }
+                },
+
+                deleteTask: function (id) {
+                    tasks = JSON.parse(localStorage.getItem('task-app-data'))
+                    new_tasks = []
+
+                    tasks[1].forEach(task => {
+                        if (task.id != id) {
+                            new_tasks.push(task)
+                        }
+                    });
+
+                    tasks[1] = new_tasks
+                    this.setItemInLocalStorage(tasks)
+                    this.getTask()
+                },
+            }
+        });
+
+    </script>
+</body>
+
+</html>
